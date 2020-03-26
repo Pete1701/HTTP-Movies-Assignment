@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useRouteMatch } from 'react-router-dom';
 import MovieCard from './MovieCard';
 
-function Movie({ addToSavedList }) {
+function Movie(props) {
   const [movie, setMovie] = useState(null);
   const match = useRouteMatch();
 
@@ -15,16 +15,28 @@ function Movie({ addToSavedList }) {
   };
 
   const saveMovie = () => {
-    addToSavedList(movie);
+    props.addToSavedList(movie);
   };
 
   useEffect(() => {
+    console.log('match', match)
     fetchMovie(match.params.id);
   }, [match.params.id]);
 
   if (!movie) {
     return <div>Loading movie information...</div>;
   }
+
+  const deleteMovie = e => {
+    e.preventDefault();
+    axios
+    .delete(`http://localhost:5000/api/movies/${props.match.params.id}`)
+      .then(res => {
+        console.log(res);
+        props.history.push("/");
+      })
+      .catch(err => console.log(err));
+  };
 
   return (
     <div className='save-wrapper'>
@@ -33,6 +45,9 @@ function Movie({ addToSavedList }) {
       <div className='save-button' onClick={saveMovie}>
         Save
       </div>
+      <button onClick={() => props.history.push(`/update-movie/${props.match.params.id}`)
+      }>Edit</button>
+      <button onClick={deleteMovie}>Delete</button>
     </div>
   );
 }
